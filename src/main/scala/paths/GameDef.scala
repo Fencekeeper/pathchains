@@ -5,14 +5,15 @@ trait GameDef {
     def deltaRow = copy(row = row + 1)
     def deltaCol = copy(col = col + 1)
     def deltaRC = copy(row = row + 1, col = col + 1)
+    def <=(that: Pos) = row <= that.row && col <= that.col
+    def <(that: Pos) = this <= that && this != that
   }
-
-  def startPos: Pos
-  def goal: Pos
 
   type Terrain = Pos => Boolean
 
   def terrain: Terrain
+  def startPos: Pos
+  def goal: Pos
 
   sealed abstract class Move
   case object Right extends Move
