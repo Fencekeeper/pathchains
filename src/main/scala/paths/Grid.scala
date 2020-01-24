@@ -15,6 +15,9 @@ class Grid(m: Int, n: Int) extends GameDef {
   type PartialPath = (Block, List[Move])
 
   def pathLength(p: PartialPath) = p._2.length
+  def minimalLength = m max n
+  def maximalLength = m + n
+  def isMinimal(p: PartialPath) = pathLength(p) == minimalLength
 
   def pathToSet(p: PartialPath): Set[Pos] = {
 

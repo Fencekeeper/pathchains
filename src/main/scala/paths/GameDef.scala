@@ -16,6 +16,11 @@ package paths
  * An idea. Maybe I could use this exercise to demonstrate property-based testing
  * at the Itera conference and/or at some testforum? I would then have several tests
  * that I can implement, like the counting of paths and the Euler characteristic.
+ *
+ * Actually, I think there is room for a demo of property-based testing. Because
+ * I can test that Solver(m, n) yields the same things as Solver(n, m), I can construct
+ * tests concerning minimal paths, and there are in fact several properties
+ * that either involve a single code unit or a combination of code units.
  */
 
 trait GameDef {
