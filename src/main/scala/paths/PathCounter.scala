@@ -3,7 +3,7 @@ package paths
 object PathCounter extends App {
 
   val s = new Solver(1, 1)
-  println("Paths to target:")
+  println("Paths to goal:")
   s.pathsToGoal.foreach(println)
   println("\nPaths grouped by minimality:")
   println(s.pathsGroupedByMinimality)

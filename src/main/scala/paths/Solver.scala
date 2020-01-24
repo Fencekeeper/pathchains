@@ -21,29 +21,29 @@ package paths
 
 class Solver(m: Int, n: Int) extends Grid(m, n) {
 
-  def neighborsWithHistory(b: Block, history: List[Move]): LazyList[PartialPath] =
-    for ( ln <- b.legalNeighbors.to(LazyList) ) yield (ln._1, ln._2 :: history)
+  def neighborsWithHistory(b: Block, history: List[Move]): List[PartialPath] =
+    for ( ln <- b.legalNeighbors.to(List) ) yield (ln._1, ln._2 :: history)
 
   // Would this be useful?
-  // def elementaryExpansions(b: Block, history: List[Move]): LazyList[PartialPath] = ???
+  // def elementaryExpansions(b: Block, history: List[Move]): List[PartialPath] = ???
 
-  def paths(initial: LazyList[PartialPath]): LazyList[PartialPath] = {
+  def paths(initial: List[PartialPath]): List[PartialPath] = {
     if (initial.isEmpty)
-      LazyList.empty
+      List()
     else {
       val more = for {
         path <- initial // traverses through partial paths
         neighbor <- neighborsWithHistory(path._1, path._2) // traverses through neighbors
       } yield neighbor
 
-      initial #::: paths(more)
+      initial ::: paths(more)
     }
   }
 
-  def init: PartialPath = (Block(startPos), List.empty)
+  def init: PartialPath = (Block(startPos), List())
 
   lazy val pathsToGoal =
-    paths(LazyList(init)).filter(path => done(path._1))
+    paths(List(init)).filter(path => done(path._1)).map(pp => pp._2)
 
   def pathsGroupedByMinimality =
     pathsToGoal.groupBy(p => if (pathLength(p) == minimalLength) "minimal" else "non-minimal")
@@ -57,37 +57,41 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
    * if I do it as naively as below, then I would have to compare
    * paths to put them into chains.
    */
-  type PathChain = LazyList[PartialPath]
+  type PathChain = List[Path]
   def canGrow(pc: PathChain) = !isMinimal(pc.head)
 
   // The plan is to use all paths except the ones of length zero as initial and then the empty list
   // as buildup. Because I managed to make the function tail-recursive, this should not
   // blow the stack. What about the heap?
-  def chains(initial: LazyList[PathChain], gather: LazyList[PathChain]): LazyList[PathChain] = initial match {
-    case LazyList() => gather
+  def chains(initial: List[PathChain], gather: List[PathChain]): List[PathChain] = initial match {
+    case List() => gather
     case _ => {
       val more = for {
         pc <- initial
         (key, value) <- pathsGroupedByLength
         path <- value
         if (key < pathLength(pc.head) && pathLessThan(path, pc.head))
-      } yield path #:: pc
+      } yield path :: pc
+
+      println("\nInside chains: initial.head = " + initial.head + " ...and ")
 
       val grouped = more.groupBy(pc => if (canGrow(pc)) "viable" else "non-viable")
 
       val viable = grouped.get("viable") match {
         case Some(value) => value
-        case None => LazyList()
+        case None => List()
       }
 
       val nonViable = grouped.get("non-viable") match {
         case Some(value) => value
-        case None => LazyList()
+        case None => List()
       }
 
       /**
        * The following printouts clearly show that the for-comprehension
-       * is not working as intended.
+       * is not working as intended. As of friday 24th of January,
+       * at 15:00, I've determined that the function pathLessThan
+       * does not work
        */
 
       println("\ngather:")
@@ -101,14 +105,18 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
       println("\nviable:")
       viable.foreach(println)
 
-      chains(viable, nonViable #::: initial #::: gather)
+      chains(viable, nonViable ::: initial ::: gather)
     }
   }
 
   lazy val eulercharacteristic = {
     val grouped = pathsGroupedByMinimality
 
-    chains(grouped("non-minimal").map(p => LazyList(p)), grouped("minimal").map(p => LazyList(p))).
+    println("The result of ...")
+    println(pathLessThan(List(Diagonally), List(Up, Right)))
+    println("...applying pathLessThan on List(Diagonally) and List(Up, Right).")
+
+    chains(grouped("non-minimal").map(p => List(p)), grouped("minimal").map(p => List(p))).
       map(pc => pc.length).groupBy(identity).
       map{case (key, value) => (key, value.length)}.
       map{case (key, value) => if (key % 2 == 0) (key, value) else (key, -value)}/*.

@@ -13,27 +13,46 @@ class Grid(m: Int, n: Int) extends GameDef {
     p => startPos <= p && p <= goal
 
   type PartialPath = (Block, List[Move])
+  type Path = List[Move]
 
-  def pathLength(p: PartialPath) = p._2.length
+  def pathLength(p: Path): Int = p.length
+  def pathLength(p: PartialPath): Int = pathLength(p._2)
+
+  def isMinimal(p: Path) = pathLength(p) == minimalLength
+
   def minimalLength = m max n
   def maximalLength = m + n
-  def isMinimal(p: PartialPath) = pathLength(p) == minimalLength
 
+  /**
+   * There's a bug in this method or in pathLessThan.
+   * @param p
+   * @return
+   */
   def pathToSet(p: PartialPath): Set[Pos] = {
 
     def aux(positions: List[Pos], moves: List[Move]): List[Pos] = moves match {
       case hd :: tl => hd match {
-        case Right => positions.head.left :: positions
-        case Up => positions.head.down :: positions
-        case Diagonally => positions.head.diagonallyLeft :: positions
+        case Right => aux(positions.head.left :: positions, tl)
+        case Up => aux(positions.head.down :: positions, tl)
+        case Diagonally => aux(positions.head.diagonallyLeft :: positions, tl)
       }
-      case Nil => positions
+      case List() => positions
     }
 
     aux(p._1.pos :: Nil, p._2).to(Set)
   }
 
-  // Returns true if p1 viewed as a set is contained in p2
+  // Returns true if p1 viewed as a set is contained in p2.
+  // There may be a bug in this method.
   def pathLessThan(p1: PartialPath, p2: PartialPath): Boolean =
-    pathToSet(p1).map(pathToSet(p2).contains).reduce(_ && _)
+    pathToSet(p1).map(pathToSet(p2).contains).reduce(_ && _) // Connection with my code?
+
+  def pathToSet(p: Path): Set[Pos] = pathToSet((Block(Pos(m, n)), p))
+
+  // Returns true if p1 viewed as a set is contained in p2
+  def pathLessThan(p1: Path, p2: Path): Boolean = {
+    val b = Block(Pos(m, n))
+
+    pathLessThan((b, p1), (b, p2))
+  }
 }
