@@ -1,7 +1,7 @@
 package paths
 
 object PathCounter extends App {
-  val dim = 8
+  val dim = 4
 
   val solverResults = {
     for {
@@ -10,7 +10,7 @@ object PathCounter extends App {
       if (j <= i)
     } yield new Solver(i, j)
   }.
-    map(s => s.dimensions + " " + s.pathsToGoal.length)
+    map(s => s.dimensions + " " + s.pathsToGoal.length + " " + s.eulercharacteristic)
 
   solverResults.foreach(println)
 }

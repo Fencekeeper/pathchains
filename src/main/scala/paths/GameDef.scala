@@ -26,8 +26,13 @@ trait GameDef {
     def <=(that: Pos) = row <= that.row && col <= that.col
     def <(that: Pos) = this <= that && this != that
 
+    def right = deltaCol(1)
     def left = deltaCol(-1)
+
+    def up = deltaRow(1)
     def down = deltaRow(-1)
+
+    def diagonallyRight = deltaRC(1, 1)
     def diagonallyLeft = deltaRC(-1, -1)
   }
 
@@ -37,15 +42,17 @@ trait GameDef {
   def startPos: Pos
   def goal: Pos
 
+  def done(b: Block) = b == Block(goal)
+
   sealed abstract class Move
   case object Right extends Move
   case object Up extends Move
   case object Diagonally extends Move
 
   case class Block(pos: Pos) {
-    def right = Block(pos.deltaCol(1))
-    def up = Block(pos.deltaRow(1))
-    def diagonallyRight = Block(pos.deltaRC(1, 1))
+    def right = Block(pos.right)
+    def up = Block(pos.up)
+    def diagonallyRight = Block(pos.diagonallyRight)
 
     def isLegal: Boolean = terrain(pos)
 

@@ -42,10 +42,11 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
 
   def init: PartialPath = (Block(startPos), List.empty)
 
-  lazy val pathsToGoal = paths(LazyList(init)).filter(path => done(path._1))
+  lazy val pathsToGoal =
+    paths(LazyList(init)).filter(path => done(path._1))
 
   def pathsGrouped(ps: LazyList[PartialPath]) =
-    ps.groupBy(length)
+    ps.groupBy(pathLength)
 
   /**
    * Actually, this type is somewhat misleading as there must be order.
@@ -55,5 +56,31 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
    */
   type PathChain = LazyList[PartialPath]
 
-  // def chains(initial: LazyList[PathChain]): LazyList[PathChain] = ???
+  // The plan is to use all paths except the ones of length zero as initial and then the empty list
+  // as buildup. Because I managed to make the function tail-recursive, this should not
+  // blow the stack. What about the heap?
+  def chains(initial: LazyList[PathChain], gather: LazyList[PathChain]): LazyList[PathChain] = initial match {
+    case LazyList() => gather
+    case _ => {
+      val more = for {
+        pc <- initial
+        (key, value) <- pathsGrouped(pathsToGoal)
+        path <- value
+        if (key < pathLength(pc.head) && pathLessThan(path, pc.head))
+      } yield path #:: pc
+
+      chains(more, initial #::: gather)
+    }
+  }
+
+  lazy val eulercharacteristic = {
+    val grouped = pathsToGoal.groupBy(p => if (pathLength(p) == 0) "zero" else "non-zero")
+
+    chains(pathsToGoal.filter(p => pathLength(p) > 0).map(p => LazyList(p)), pathsToGoal.filter(p => pathLength(p) == 0).map(p => LazyList(p))).
+      map(pc => pc.length).groupBy(identity).
+      map{case (key, value) => (key, value.length)}.
+      map{case (key, value) => if (key % 2 == 0) (key, value) else (key, -value)}/*.
+      values.
+      reduce(_ + _)*/
+  }
 }

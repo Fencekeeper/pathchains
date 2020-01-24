@@ -12,11 +12,9 @@ class Grid(m: Int, n: Int) extends GameDef {
   override def terrain: Terrain =
     p => startPos <= p && p <= goal
 
-  def done(b: Block) = b == Block(goal)
-
   type PartialPath = (Block, List[Move])
 
-  def length(p: PartialPath) = p._2.length
+  def pathLength(p: PartialPath) = p._2.length
 
   def pathToSet(p: PartialPath): Set[Pos] = {
 
@@ -32,7 +30,7 @@ class Grid(m: Int, n: Int) extends GameDef {
     aux(p._1.pos :: Nil, p._2).to(Set)
   }
 
-  // Returns true if a viewed as a set is contained in b
-  def pathLessThan(a: PartialPath, b: PartialPath): Boolean =
-    pathToSet(a).map(pathToSet(b).contains).reduce(_ && _)
+  // Returns true if p1 viewed as a set is contained in p2
+  def pathLessThan(p1: PartialPath, p2: PartialPath): Boolean =
+    pathToSet(p1).map(pathToSet(p2).contains).reduce(_ && _)
 }
