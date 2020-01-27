@@ -2,6 +2,7 @@ package paths
 
 object PathCounter extends App {
 
+  /*
   val s = new Solver(1, 1)
   println("Paths to goal:")
   s.pathsToGoal.foreach(println)
@@ -11,7 +12,9 @@ object PathCounter extends App {
   println(s.pathsGroupedByLength)
   println("\nEuler Characteristic: " + s.eulercharacteristic)
 
-  /*
+   */
+
+  ///*
   val dim = 3
 
   val solverResults = {
@@ -23,5 +26,6 @@ object PathCounter extends App {
   }.
     map(s => s.dimensions + " " + s.pathsToGoal.length + " " + s.eulercharacteristic)
 
-  solverResults.foreach(println)*/
+  solverResults.foreach(println)
+  //*/
 }

@@ -28,17 +28,24 @@ trait GameDef {
     def deltaRow(d: Int) = copy(row = row + d)
     def deltaCol(d: Int) = copy(col = col + d)
     def deltaRC(d1: Int, d2: Int) = copy(row = row + d1, col = col + d2)
+
     def <=(that: Pos) = row <= that.row && col <= that.col
     def <(that: Pos) = this <= that && this != that
 
     def right = deltaCol(1)
     def left = deltaCol(-1)
-
     def up = deltaRow(1)
     def down = deltaRow(-1)
-
     def diagonallyRight = deltaRC(1, 1)
     def diagonallyLeft = deltaRC(-1, -1)
+
+    def isLegal: Boolean = terrain(this)
+
+    def neighbors: List[(Pos, Move)] =
+      (right, Right) :: (up, Up) :: (diagonallyRight, Diagonally) :: Nil
+
+    def legalNeighbors: List[(Pos, Move)] =
+      neighbors.filter(pm => pm._1.isLegal)
   }
 
   type Terrain = Pos => Boolean
@@ -47,24 +54,11 @@ trait GameDef {
   def startPos: Pos
   def goal: Pos
 
-  def done(b: Block) = b == Block(goal)
+  def done(pos: Pos) = pos == goal
 
   sealed abstract class Move
   case object Right extends Move
   case object Up extends Move
   case object Diagonally extends Move
 
-  case class Block(pos: Pos) {
-    def right = Block(pos.right)
-    def up = Block(pos.up)
-    def diagonallyRight = Block(pos.diagonallyRight)
-
-    def isLegal: Boolean = terrain(pos)
-
-    def neighbors: List[(Block, Move)] =
-      (right, Right) :: (up, Up) :: (diagonallyRight, Diagonally) :: Nil
-
-    def legalNeighbors: List[(Block, Move)] =
-      neighbors.filter(bm => bm._1.isLegal)
-  }
 }

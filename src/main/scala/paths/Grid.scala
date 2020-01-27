@@ -5,14 +5,14 @@ package paths
  */
 class Grid(m: Int, n: Int) extends GameDef {
 
-  override def startPos = Pos(0, 0)
-  override def goal: Pos = Pos(m, n)
+  lazy val startPos = Pos(0, 0)
+  lazy val goal: Pos = Pos(m, n)
   def dimensions = (m, n)
 
   override def terrain: Terrain =
     p => startPos <= p && p <= goal
 
-  type PartialPath = (Block, List[Move])
+  type PartialPath = (Pos, List[Move])
   type Path = List[Move]
 
   def pathLength(p: Path): Int = p.length
@@ -39,7 +39,7 @@ class Grid(m: Int, n: Int) extends GameDef {
       case List() => positions
     }
 
-    aux(p._1.pos :: Nil, p._2).to(Set)
+    aux(p._1 :: Nil, p._2).to(Set)
   }
 
   // Returns true if p1 viewed as a set is contained in p2.
@@ -47,12 +47,8 @@ class Grid(m: Int, n: Int) extends GameDef {
   def pathLessThan(p1: PartialPath, p2: PartialPath): Boolean =
     pathToSet(p1).map(pathToSet(p2).contains).reduce(_ && _) // Connection with my code?
 
-  def pathToSet(p: Path): Set[Pos] = pathToSet((Block(Pos(m, n)), p))
+  def pathToSet(p: Path): Set[Pos] = pathToSet((goal, p))
 
   // Returns true if p1 viewed as a set is contained in p2
-  def pathLessThan(p1: Path, p2: Path): Boolean = {
-    val b = Block(Pos(m, n))
-
-    pathLessThan((b, p1), (b, p2))
-  }
+  def pathLessThan(p1: Path, p2: Path): Boolean = pathLessThan((goal, p1), (goal, p2))
 }

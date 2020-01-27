@@ -21,8 +21,8 @@ package paths
 
 class Solver(m: Int, n: Int) extends Grid(m, n) {
 
-  def neighborsWithHistory(b: Block, history: List[Move]): List[PartialPath] =
-    for ( ln <- b.legalNeighbors.to(List) ) yield (ln._1, ln._2 :: history)
+  def neighborsWithHistory(pos: Pos, history: List[Move]): List[PartialPath] =
+    for ( ln <- pos.legalNeighbors.to(List) ) yield (ln._1, ln._2 :: history)
 
   // Would this be useful?
   // def elementaryExpansions(b: Block, history: List[Move]): List[PartialPath] = ???
@@ -40,7 +40,7 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
     }
   }
 
-  def init: PartialPath = (Block(startPos), List())
+  def init: PartialPath = (startPos, List())
 
   lazy val pathsToGoal =
     paths(List(init)).filter(path => done(path._1)).map(pp => pp._2)
@@ -109,6 +109,9 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
     }
   }
 
+  /**
+   * I have an off by one-error. Seems I calculate chain-length as 1 too high.
+   */
   lazy val eulercharacteristic = {
     val grouped = pathsGroupedByMinimality
 
@@ -117,7 +120,7 @@ class Solver(m: Int, n: Int) extends Grid(m, n) {
     println("...applying pathLessThan on List(Diagonally) and List(Up, Right).")
 
     chains(grouped("non-minimal").map(p => List(p)), grouped("minimal").map(p => List(p))).
-      map(pc => pc.length).groupBy(identity).
+      map(pc => pc.length - 1).groupBy(identity).
       map{case (key, value) => (key, value.length)}.
       map{case (key, value) => if (key % 2 == 0) (key, value) else (key, -value)}/*.
       values.
