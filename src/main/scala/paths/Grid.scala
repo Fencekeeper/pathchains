@@ -1,8 +1,5 @@
 package paths
 
-/**
- * Recall that we're only interested in the case when m >= n.
- */
 class Grid(m: Int, n: Int) extends GameDef {
 
   lazy val startPos = Pos(0, 0)
@@ -23,11 +20,7 @@ class Grid(m: Int, n: Int) extends GameDef {
   def minimalLength = m max n
   def maximalLength = m + n
 
-  /**
-   * There's a bug in this method or in pathLessThan.
-   * @param p
-   * @return
-   */
+  // For simplicity, a path is converted into a set.
   def pathToSet(p: PartialPath): Set[Pos] = {
 
     def aux(positions: List[Pos], moves: List[Move]): List[Pos] = moves match {
@@ -42,8 +35,15 @@ class Grid(m: Int, n: Int) extends GameDef {
     aux(p._1 :: Nil, p._2).to(Set)
   }
 
-  // Returns true if p1 viewed as a set is contained in p2.
-  // There may be a bug in this method.
+  /**
+   * This function is inefficient because the paths are converted to sets. One could
+   * make an algorithm that compares paths without this conversion, although I suspect
+   * readability would be worse.
+   *
+   * @param p1 is a PartialPath to be compared with p2
+   * @param p2 is a PartialPath
+   * @return true if p1 viewed as a set is included in p2 viewed as a set
+   */
   def pathLessThan(p1: PartialPath, p2: PartialPath): Boolean =
     pathToSet(p1).map(pathToSet(p2).contains).reduce(_ && _) // Connection with my code?
 
