@@ -6,6 +6,11 @@ package paths
  * 1) Import ScalaTest and ScalaCheck - done
  * 2) Make a generator of paths (and partial paths?) - not done
  * 3) Write tests where there are at least several property-based tests (both unit and integration) - not done
+ * 4) Try to make plausible errors so that a suite of property-based tests seems to be needed
+ * and it is not the case that all errors are discovered by one or two simple tests. On the other hand,
+ * ScalaCheck can save much work even with a few simple property-based tests, because these would replace
+ * a great many non-property based tests. The reason is that although you can reason about boundary-values
+ * then what if boundaries change? Property-based tests would likely accomodate such change.
  *
  * To check if this is viable as a demo, I need to come up with a reasonable number of properties
  * that I could define. At least some of them need to be interesting combinations of at least
